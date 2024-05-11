@@ -3,6 +3,7 @@ from tkinter import *
 from PIL import Image, ImageTk
 import pygame
 import random, time, threading
+import numpy as np
 
 def monte_carlo_pi(num_samples):
     inside_circle = 0
@@ -30,6 +31,27 @@ def calculate_scores(sample_sizes):
         score = score + elapsed_time
 
     return score
+
+def is_prime(n):
+    if n <= 1:
+        return False
+    for i in range(2, n):
+        if n % i == 0:
+            return False
+    return True
+
+def find_primes(n):
+    primes = []
+    for i in range(2, n):
+        if is_prime(i):
+            primes.append(i)
+    return primes
+
+def fibonacci(n):
+    if n <= 1:
+        return n
+    else:
+        return fibonacci(n-1) + fibonacci(n-2)
 
 class StartFrame(Frame):
     def __init__(self, parent, controller):
@@ -83,7 +105,6 @@ class StartFrame(Frame):
         canvas.tag_bind('exit_button', "<Enter>", lambda event: self.enter())
         canvas.tag_bind('exit_button', "<Leave>", lambda event: self.leave())
 
-
     def exit_app(self, event=None):
         self.controller.quit()
 
@@ -97,9 +118,10 @@ class StartFrame(Frame):
         self.controller.show_frame(AlgorithmFrame)
 
 class AlgorithmFrame(Frame):
-    def __init__(self, parent, controller):
+    def __init__(self, parent, controller, sample_sizes):
         Frame.__init__(self, parent)
         self.controller = controller
+        self.sample_sizes = sample_sizes
 
         self.canvas = tk.Canvas(self, bg="#FFFFFF", bd=0, highlightthickness=0, relief="ridge")
         self.canvas.pack(fill="both", expand=True)
@@ -149,12 +171,13 @@ class AlgorithmFrame(Frame):
             self.canvas.move(self.image_item, 0, 5)
             x0, y0, x1, y1 = self.canvas.bbox(self.image_item)
             if y1 >= 1080:
-                threading.Thread(target=self.execute_monte_carlo).start()
+                threading.Thread(target=self.execute_algorithms).start()
                 return
             self.after(61, self.move_image)
 
-    def execute_monte_carlo(self):
-        monte_carlo_result = monte_carlo_pi(10000000)
+    def execute_algorithms(self):
+        for num_samples in self.sample_sizes:
+            monte_carlo_result = monte_carlo_pi(num_samples)
         if monte_carlo_result:
             self.controller.show_frame(ResultFrame)
 
@@ -212,7 +235,7 @@ def play():
     pygame.mixer.init()
     pygame.mixer.music.load("song.mp3")
     pygame.mixer.music.play(loops=0)
-    pygame.mixer.music.set_volume(0.05)
+    pygame.mixer.music.set_volume(0.02)
 
 class MainApplication(tk.Tk):
     def __init__(self, *args, **kwargs):
@@ -232,8 +255,10 @@ class MainApplication(tk.Tk):
         for F in (StartFrame, AlgorithmFrame, ResultFrame):
             if F == ResultFrame:
                 frame = F(container, self, score)
-            else:
-                frame = F(container, self)
+            elif F == AlgorithmFrame:
+                frame = F(container, self, sample_sizes)
+            else :
+                frame = F(container,self)
             self.frames[F] = frame
             frame.grid(row=0, column=0, sticky="nsew")
 
