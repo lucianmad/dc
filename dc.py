@@ -5,6 +5,7 @@ import pygame
 import random, time, threading
 import numpy as np
 
+
 def monte_carlo_pi(num_samples):
     inside_circle = 0
 
@@ -32,6 +33,7 @@ def calculate_scores1(sample_sizes):
 
     return score
 
+
 def is_prime(n):
     if n <= 1:
         return False
@@ -40,6 +42,7 @@ def is_prime(n):
             return False
     return True
 
+
 def find_primes(n):
     primes = []
     for i in range(2, n):
@@ -47,12 +50,14 @@ def find_primes(n):
             primes.append(i)
     return primes
 
+
 def fibonacci(n):
     if n <= 1:
         return n
     else:
-        return fibonacci(n-1) + fibonacci(n-2)
-    
+        return fibonacci(n - 1) + fibonacci(n - 2)
+
+
 def calculate_scores2(sample_sizes, n, x):
     score = 0
 
@@ -68,68 +73,100 @@ def calculate_scores2(sample_sizes, n, x):
 
     return score
 
+
 class StartFrame(Frame):
     def __init__(self, parent, controller):
         Frame.__init__(self, parent)
         self.controller = controller
 
-        canvas = tk.Canvas(self, bg="#FFFFFF", bd=0, highlightthickness=0, relief="ridge")
-        canvas.pack(fill="both", expand=True)
+        self.canvas = tk.Canvas(self, bg="#FFFFFF", bd=0, highlightthickness=0, relief="ridge")
+        self.canvas.pack(fill="both", expand=True)
 
         image_original = Image.open("image_1.png").resize((1920, 1080))
         self.image_tk = ImageTk.PhotoImage(image_original)
-        canvas.create_image(0, 0, image=self.image_tk, anchor='nw')
+        self.canvas.create_image(0, 0, image=self.image_tk, anchor='nw')
 
         image2_original = Image.open("image_3.png").resize((600, 700))
         self.image2_tk = ImageTk.PhotoImage(image2_original)
-        canvas.create_image(0, 380, image=self.image2_tk, anchor='nw')
+        self.canvas.create_image(0, 380, image=self.image2_tk, anchor='nw')
 
         image3_original = Image.open("image_2.png").resize((301, 484))
         self.image3_tk = ImageTk.PhotoImage(image3_original)
-        canvas.create_image(1570, 630, image=self.image3_tk, anchor='nw')
+        self.canvas.create_image(1570, 630, image=self.image3_tk, anchor='nw')
 
         image4_original = Image.open("image_4.png").resize((223, 199))
         self.image4_tk = ImageTk.PhotoImage(image4_original)
-        canvas.create_image(1000, 290, image=self.image4_tk, anchor='nw')
+        self.canvas.create_image(1000, 290, image=self.image4_tk, anchor='nw')
 
         image5_original = Image.open("image_5.png").resize((450, 321))
         self.image5_tk = ImageTk.PhotoImage(image5_original)
-        canvas.create_image(310, 320, image=self.image5_tk, anchor='nw')
+        self.canvas.create_image(310, 320, image=self.image5_tk, anchor='nw')
 
         image6_original = Image.open("image_6.png").resize((1802, 83))
         self.image6_tk = ImageTk.PhotoImage(image6_original)
-        canvas.create_image(60, 40, image=self.image6_tk, anchor='nw')
+        self.canvas.create_image(60, 40, image=self.image6_tk, anchor='nw')
 
         image7_original = Image.open("image_7.png").resize((215, 181))
         self.image7_tk = ImageTk.PhotoImage(image7_original)
-        canvas.create_image(430, 390, image=self.image7_tk, anchor='nw')
+        self.canvas.create_image(430, 390, image=self.image7_tk, anchor='nw')
 
-        button_image = Image.open("button_1.png").resize((300, 250))
+        button_image = Image.open("button_short.png").resize((400, 200))
         self.button_image_tk1 = ImageTk.PhotoImage(button_image)
-        button1 = canvas.create_image(650, 670, image=self.button_image_tk1, anchor='nw', tag='event_button1')
-        canvas.tag_bind('event_button1', "<Button-1>", lambda event: self.switch_content(AlgorithmFrame))
+        self.button1 = self.canvas.create_image(650, 700, image=self.button_image_tk1, anchor='nw', tag='event_button1')
 
-        button_image = Image.open("button_2.png").resize((300, 250))
-        self.button_image_tk2 = ImageTk.PhotoImage(button_image)
-        button2 = canvas.create_image(1150, 650, image=self.button_image_tk2, anchor='nw', tag='event_button2')
-        canvas.tag_bind('event_button2', "<Button-1>", lambda event: self.switch_content(AlgorithmFrameLong))
+        button_hover_image = Image.open("button_short_hover.png").resize((400, 200))
+        self.button_hover_image_tk1 = ImageTk.PhotoImage(button_hover_image)
+
+        self.canvas.tag_bind('event_button1', "<Button-1>", lambda event: self.switch_content(AlgorithmFrame))
+        self.canvas.tag_bind('event_button1', "<Enter>", lambda event: self.b1_enter())
+        self.canvas.tag_bind('event_button1', "<Leave>", lambda event: self.b1_leave())
+
+        button2_image = Image.open("button_long.png").resize((400, 200))
+        self.button_image_tk2 = ImageTk.PhotoImage(button2_image)
+        self.button2 = self.canvas.create_image(1150, 700, image=self.button_image_tk2, anchor='nw', tag='event_button2')
+
+        button2_hover_image = Image.open("button_long_hover.png").resize((400, 200))
+        self.button_hover_image_tk2 = ImageTk.PhotoImage(button2_hover_image)
+
+        self.canvas.tag_bind('event_button2', "<Button-1>", lambda event: self.switch_content(AlgorithmFrameLong))
+        self.canvas.tag_bind('event_button2', "<Enter>", lambda event: self.b2_enter())
+        self.canvas.tag_bind('event_button2', "<Leave>", lambda event: self.b2_leave())
 
         exit_button_image = Image.open("exit.png").resize((50, 50))
         self.exit_button_image_tk = ImageTk.PhotoImage(exit_button_image)
-        button3 = canvas.create_image(980, 1040, image=self.exit_button_image_tk, anchor='nw', tag='exit_button')
-        canvas.tag_bind('exit_button', "<Button-1>", self.exit_app)
+        button3 = self.canvas.create_image(980, 1040, image=self.exit_button_image_tk, tag='exit_button')
+
+        self.canvas.tag_bind('exit_button', "<Button-1>", self.exit_app)
+        self.canvas.tag_bind('exit_button', "<Enter>", lambda event: self.enter_exit_button())
+        self.canvas.tag_bind('exit_button', "<Leave>", lambda event: self.leave_exit_button())
+
+    def enter_exit_button(self):
+        self.controller.config(cursor="hand2")
+
+    def leave_exit_button(self):
+        self.controller.config(cursor="")
+    def b1_enter(self):
+        self.canvas.itemconfig(self.button1, image=self.button_hover_image_tk1)
+        self.controller.config(cursor="hand2")
+
+    def b1_leave(self):
+        self.canvas.itemconfig(self.button1, image=self.button_image_tk1)
+        self.controller.config(cursor="")
 
     def exit_app(self, event=None):
         self.controller.quit()
 
-    def enter(self):
+    def b2_enter(self):
+        self.canvas.itemconfig(self.button2, image=self.button_hover_image_tk2)
         self.controller.config(cursor="hand2")
 
-    def leave(self):
+    def b2_leave(self):
+        self.canvas.itemconfig(self.button2, image=self.button_image_tk2)
         self.controller.config(cursor="")
 
     def switch_content(self, frame_class):
         self.controller.show_frame(frame_class)
+
 
 class AlgorithmFrame(Frame):
     def __init__(self, parent, controller):
@@ -192,12 +229,13 @@ class AlgorithmFrame(Frame):
         sample_sizes = [100000, 500000, 1000000]
         score = calculate_scores1(sample_sizes)
         if score:
-            self.controller.show_frame(ResultFrame, score = score)
+            self.controller.show_frame(ResultFrame, score=score)
 
     def create_loading_circle(self):
         x0, y0 = self.canvas.winfo_width() / 2, self.canvas.winfo_height() / 2
         radius = 60
-        self.loading_circle = self.canvas.create_oval(x0 - radius, y0 - radius, x0 + radius, y0 + radius, outline="#FFFFFF", width = 10)
+        self.loading_circle = self.canvas.create_oval(x0 - radius, y0 - radius, x0 + radius, y0 + radius,
+                                                      outline="#FFFFFF", width=10)
         self.animate_loading_circle()
 
     def animate_loading_circle(self):
@@ -205,8 +243,11 @@ class AlgorithmFrame(Frame):
         self.canvas.delete(self.loading_circle)
         x0, y0 = self.canvas.winfo_width() / 2, self.canvas.winfo_height() / 2
         radius = 60
-        self.loading_circle = self.canvas.create_arc(x0 - radius, y0 - radius, x0 + radius, y0 + radius,start=self.loading_angle, extent=90, outline="#FFFFFF",style="arc", width = 10)
+        self.loading_circle = self.canvas.create_arc(x0 - radius, y0 - radius, x0 + radius, y0 + radius,
+                                                     start=self.loading_angle, extent=90, outline="#FFFFFF",
+                                                     style="arc", width=10)
         self.after(25, self.animate_loading_circle)
+
 
 class AlgorithmFrameLong(Frame):
     def __init__(self, parent, controller):
@@ -267,14 +308,15 @@ class AlgorithmFrameLong(Frame):
 
     def execute_algorithms(self):
         sample_sizes1 = [100000, 500000, 1000000]
-        score = calculate_scores2(sample_sizes1, 35, 1000000)
+        score = calculate_scores2(sample_sizes1, 20, 100000)
         if score:
-            self.controller.show_frame(ResultFrame, score = score)
+            self.controller.show_frame(ResultFrame, score=score)
 
     def create_loading_circle(self):
         x0, y0 = self.canvas.winfo_width() / 2, self.canvas.winfo_height() / 2
         radius = 60
-        self.loading_circle = self.canvas.create_oval(x0 - radius, y0 - radius, x0 + radius, y0 + radius, outline="#FFFFFF", width = 10)
+        self.loading_circle = self.canvas.create_oval(x0 - radius, y0 - radius, x0 + radius, y0 + radius,
+                                                      outline="#FFFFFF", width=10)
         self.animate_loading_circle()
 
     def animate_loading_circle(self):
@@ -282,8 +324,11 @@ class AlgorithmFrameLong(Frame):
         self.canvas.delete(self.loading_circle)
         x0, y0 = self.canvas.winfo_width() / 2, self.canvas.winfo_height() / 2
         radius = 60
-        self.loading_circle = self.canvas.create_arc(x0 - radius, y0 - radius, x0 + radius, y0 + radius,start=self.loading_angle, extent=90, outline="#FFFFFF",style="arc", width = 10)
+        self.loading_circle = self.canvas.create_arc(x0 - radius, y0 - radius, x0 + radius, y0 + radius,
+                                                     start=self.loading_angle, extent=90, outline="#FFFFFF",
+                                                     style="arc", width=10)
         self.after(25, self.animate_loading_circle)
+
 
 class ResultFrame(Frame):
     def __init__(self, parent, controller, score=None):
@@ -302,7 +347,8 @@ class ResultFrame(Frame):
         self.image6_tk = ImageTk.PhotoImage(image6_original)
         self.canvas.create_image(779, 365, image=self.image6_tk, anchor='nw')
 
-        self.text_score = self.canvas.create_text(945, 850, text=f" {self.score} points", font=("Arial", 23), fill="yellow", anchor="center")
+        self.text_score = self.canvas.create_text(945, 850, text=f" {self.score} points", font=("Arial", 23),
+                                                  fill="yellow", anchor="center")
 
         exit_button_image = Image.open("exit.png").resize((50, 50))
         self.exit_button_image_tk = ImageTk.PhotoImage(exit_button_image)
@@ -326,11 +372,13 @@ class ResultFrame(Frame):
             self.score = score
         self.canvas.itemconfigure(self.text_score, text=f" {self.score} points")
 
+
 def play():
     pygame.mixer.init()
     pygame.mixer.music.load("song.mp3")
     pygame.mixer.music.play(loops=0)
     pygame.mixer.music.set_volume(0.02)
+
 
 class MainApplication(tk.Tk):
     def __init__(self, *args, **kwargs):
@@ -345,17 +393,17 @@ class MainApplication(tk.Tk):
         container.grid_columnconfigure(0, weight=1)
 
         self.frames = {}
-        for F in (StartFrame, AlgorithmFrame, ResultFrame):
+        for F in (StartFrame, AlgorithmFrame, AlgorithmFrameLong, ResultFrame):
             if F == ResultFrame:
                 frame = F(container, self, score=score)
-            else :
-                frame = F(container,self)
+            else:
+                frame = F(container, self)
             self.frames[F] = frame
             frame.grid(row=0, column=0, sticky="nsew")
 
         self.show_frame(StartFrame)
 
-    def show_frame(self, cont, score = None):
+    def show_frame(self, cont, score=None):
         frame = self.frames[cont]
         frame.tkraise()
         if cont in (AlgorithmFrame, AlgorithmFrameLong):
