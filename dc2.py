@@ -36,65 +36,77 @@ class StartFrame(Frame):
         Frame.__init__(self, parent)
         self.controller = controller
 
-        canvas = tk.Canvas(self, bg="#FFFFFF", bd=0, highlightthickness=0, relief="ridge")
-        canvas.pack(fill="both", expand=True)
+        self.canvas = tk.Canvas(self, bg="#FFFFFF", bd=0, highlightthickness=0, relief="ridge")
+        self.canvas.pack(fill="both", expand=True)
 
         image_original = Image.open("image_1.png").resize((1920, 1080))
         self.image_tk = ImageTk.PhotoImage(image_original)
-        canvas.create_image(0, 0, image=self.image_tk, anchor='nw')
+        self.canvas.create_image(0, 0, image=self.image_tk, anchor='nw')
 
         image2_original = Image.open("image_3.png").resize((600, 700))
         self.image2_tk = ImageTk.PhotoImage(image2_original)
-        canvas.create_image(0, 380, image=self.image2_tk, anchor='nw')
+        self.canvas.create_image(0, 380, image=self.image2_tk, anchor='nw')
 
         image3_original = Image.open("image_2.png").resize((301, 484))
         self.image3_tk = ImageTk.PhotoImage(image3_original)
-        canvas.create_image(1570, 630, image=self.image3_tk, anchor='nw')
+        self.canvas.create_image(1570, 630, image=self.image3_tk, anchor='nw')
 
         image4_original = Image.open("image_4.png").resize((223, 199))
         self.image4_tk = ImageTk.PhotoImage(image4_original)
-        canvas.create_image(1000, 290, image=self.image4_tk, anchor='nw')
+        self.canvas.create_image(1000, 290, image=self.image4_tk, anchor='nw')
 
         image5_original = Image.open("image_5.png").resize((450, 321))
         self.image5_tk = ImageTk.PhotoImage(image5_original)
-        canvas.create_image(310, 320, image=self.image5_tk, anchor='nw')
+        self.canvas.create_image(310, 320, image=self.image5_tk, anchor='nw')
 
         image6_original = Image.open("image_6.png").resize((1802, 83))
         self.image6_tk = ImageTk.PhotoImage(image6_original)
-        canvas.create_image(60, 40, image=self.image6_tk, anchor='nw')
+        self.canvas.create_image(60, 40, image=self.image6_tk, anchor='nw')
 
         image7_original = Image.open("image_7.png").resize((215, 181))
         self.image7_tk = ImageTk.PhotoImage(image7_original)
-        canvas.create_image(430, 390, image=self.image7_tk, anchor='nw')
+        self.canvas.create_image(430, 390, image=self.image7_tk, anchor='nw')
 
         button_image = Image.open("button_1.png").resize((600, 250))
         self.button_image_tk = ImageTk.PhotoImage(button_image)
-        button1 = canvas.create_image(1000, 870, image=self.button_image_tk, tag='event')
+        self.button1 = self.canvas.create_image(1000, 870, image=self.button_image_tk, tag='event')
 
-        canvas.tag_bind('event', "<Button-1>", self.switch_content)
-        canvas.tag_bind('event', "<Enter>", lambda event: self.enter())
-        canvas.tag_bind('event', "<Leave>", lambda event: self.leave())
+        self.canvas.tag_bind('event', "<Button-1>", self.switch_content)
+        self.canvas.tag_bind('event', "<Enter>", lambda event: self.enter())
+        self.canvas.tag_bind('event', "<Leave>", lambda event: self.leave())
+
+        button_hover_image = Image.open("button_2.png").resize((600, 250))
+        self.button_hover_image_tk = ImageTk.PhotoImage(button_hover_image)
 
         exit_button_image = Image.open("exit.png").resize((50,50))
         self.exit_button_image_tk = ImageTk.PhotoImage(exit_button_image)
-        button2 = canvas.create_image(980,1040, image=self.exit_button_image_tk, tag='exit_button')
+        self.button2 = self.canvas.create_image(980,1040, image=self.exit_button_image_tk, tag='exit_button')
 
-        canvas.tag_bind('exit_button', "<Button-1>", self.exit_app)
-        canvas.tag_bind('exit_button', "<Enter>", lambda event: self.enter())
-        canvas.tag_bind('exit_button', "<Leave>", lambda event: self.leave())
+        self.canvas.tag_bind('exit_button', "<Button-1>", self.exit_app)
+        self.canvas.tag_bind('exit_button', "<Enter>", lambda event: self.enter_exit_button())
+        self.canvas.tag_bind('exit_button', "<Leave>", lambda event: self.leave_exit_button())
 
 
     def exit_app(self, event=None):
         self.controller.quit()
 
     def enter(self):
+        self.canvas.itemconfig(self.button1, image=self.button_hover_image_tk)
         self.controller.config(cursor="hand2")
 
     def leave(self):
+        self.canvas.itemconfig(self.button1, image=self.button_image_tk)
         self.controller.config(cursor="")
 
     def switch_content(self, event):
         self.controller.show_frame(AlgorithmFrame)
+
+    def enter_exit_button(self):
+        self.controller.config(cursor="hand2")
+
+    def leave_exit_button(self):
+        self.controller.config(cursor="")
+
 
 class AlgorithmFrame(Frame):
     def __init__(self, parent, controller):
