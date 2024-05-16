@@ -132,10 +132,9 @@ class StartFrame(Frame):
         self.controller.show_frame(frame_class)
 
 class AlgorithmFrame(Frame):
-    def __init__(self, parent, controller, sample_sizes):
+    def __init__(self, parent, controller):
         Frame.__init__(self, parent)
         self.controller = controller
-        self.sample_sizes = sample_sizes
 
         self.canvas = tk.Canvas(self, bg="#FFFFFF", bd=0, highlightthickness=0, relief="ridge")
         self.canvas.pack(fill="both", expand=True)
@@ -190,10 +189,10 @@ class AlgorithmFrame(Frame):
             self.after(61, self.move_image)
 
     def execute_algorithms(self):
-        for num_samples in self.sample_sizes:
-            monte_carlo_result = monte_carlo_pi(num_samples)
-        if monte_carlo_result:
-            self.controller.show_frame(ResultFrame)
+        sample_sizes = [100000, 500000, 1000000]
+        score = calculate_scores1(sample_sizes)
+        if score:
+            self.controller.show_frame(ResultFrame, score = score)
 
     def create_loading_circle(self):
         x0, y0 = self.canvas.winfo_width() / 2, self.canvas.winfo_height() / 2
@@ -267,12 +266,10 @@ class AlgorithmFrameLong(Frame):
             self.after(61, self.move_image)
 
     def execute_algorithms(self):
-        monte_carlo_result = monte_carlo_pi(1000000)
-        primes_result = find_primes(1000000)
-        fibonacci_result = fibonacci(35)
-
-        if monte_carlo_result and primes_result and fibonacci_result:
-            self.controller.show_frame(ResultFrame)
+        sample_sizes1 = [100000, 500000, 1000000]
+        score = calculate_scores2(sample_sizes1, 35, 1000000)
+        if score:
+            self.controller.show_frame(ResultFrame, score = score)
 
     def create_loading_circle(self):
         x0, y0 = self.canvas.winfo_width() / 2, self.canvas.winfo_height() / 2
@@ -289,7 +286,7 @@ class AlgorithmFrameLong(Frame):
         self.after(25, self.animate_loading_circle)
 
 class ResultFrame(Frame):
-    def __init__(self, parent, controller, score):
+    def __init__(self, parent, controller, score=None):
         Frame.__init__(self, parent)
         self.controller = controller
         self.score = score
@@ -305,7 +302,7 @@ class ResultFrame(Frame):
         self.image6_tk = ImageTk.PhotoImage(image6_original)
         self.canvas.create_image(779, 365, image=self.image6_tk, anchor='nw')
 
-        self.canvas.create_text(945, 850, text=f" {score} points", font=("Arial", 23), fill="yellow", anchor="center")
+        self.text_score = self.canvas.create_text(945, 850, text=f" {self.score} points", font=("Arial", 23), fill="yellow", anchor="center")
 
         exit_button_image = Image.open("exit.png").resize((50, 50))
         self.exit_button_image_tk = ImageTk.PhotoImage(exit_button_image)
@@ -324,6 +321,11 @@ class ResultFrame(Frame):
     def leave(self):
         self.controller.config(cursor="")
 
+    def update_score(self, score=None):
+        if score is not None:
+            self.score = score
+        self.canvas.itemconfigure(self.text_score, text=f" {self.score} points")
+
 def play():
     pygame.mixer.init()
     pygame.mixer.music.load("song.mp3")
@@ -332,6 +334,7 @@ def play():
 
 class MainApplication(tk.Tk):
     def __init__(self, *args, **kwargs):
+        score = None
         tk.Tk.__init__(self, *args, **kwargs)
         self.geometry("1920x1080")
         self.configure(bg="#FFFFFF")
@@ -341,22 +344,10 @@ class MainApplication(tk.Tk):
         container.grid_rowconfigure(0, weight=1)
         container.grid_columnconfigure(0, weight=1)
 
-        sample_sizes = [100000, 500000, 1000000]
-        score1 = calculate_scores1(sample_sizes)
-
-        sample_sizes1 = [1000000]
-        score2 = calculate_scores2(sample_sizes1, 35, 1000000)
-
         self.frames = {}
         for F in (StartFrame, AlgorithmFrame, ResultFrame):
-            if F == AlgorithmFrame:
-                frame = F(container, self, sample_sizes)
-                score = score1
-            elif F == AlgorithmFrameLong:
-                frame = F(container,self)
-                score = score2
-            elif F == ResultFrame:
-                frame = F(container, self, score)
+            if F == ResultFrame:
+                frame = F(container, self, score=score)
             else :
                 frame = F(container,self)
             self.frames[F] = frame
@@ -364,11 +355,13 @@ class MainApplication(tk.Tk):
 
         self.show_frame(StartFrame)
 
-    def show_frame(self, cont):
+    def show_frame(self, cont, score = None):
         frame = self.frames[cont]
         frame.tkraise()
-        if cont == AlgorithmFrame:
+        if cont in (AlgorithmFrame, AlgorithmFrameLong):
             frame.start_animation()
+        elif cont == ResultFrame:
+            frame.update_score(score)
 
 
 if __name__ == "__main__":
