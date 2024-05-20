@@ -4,20 +4,14 @@ from PIL import Image, ImageTk
 import pygame
 import random, time, threading
 import numpy as np
+import math
+import concurrent.futures
 
+def matrix_multiplication(matrix_size):
+    A = np.random.rand(matrix_size, matrix_size)
+    B = np.random.rand(matrix_size, matrix_size)
 
-def monte_carlo_pi(num_samples):
-    inside_circle = 0
-
-    for _ in range(num_samples):
-        x = random.uniform(0, 1)
-        y = random.uniform(0, 1)
-
-        distance = x ** 2 + y ** 2
-        if distance <= 1:
-            inside_circle += 1
-
-    return (inside_circle / num_samples) * 4
+    C = np.dot(A, B)
 
 
 def calculate_scores1(sample_sizes):
@@ -25,53 +19,46 @@ def calculate_scores1(sample_sizes):
 
     for num_samples in sample_sizes:
         start_time = time.time()
-        _ = monte_carlo_pi(num_samples)
+        _ = matrix_multiplication(num_samples)
         end_time = time.time()
 
         elapsed_time = 1 / (end_time - start_time)
         score = score + elapsed_time
 
-    return score
+    return math.ceil(score * 625)
 
 
-def is_prime(n):
-    if n <= 1:
-        return False
-    for i in range(2, n):
-        if n % i == 0:
-            return False
-    return True
+def matrix_exponentiation(matrix_size, power):
+    A = np.random.rand(matrix_size, matrix_size)
+
+    result = np.identity(matrix_size)
+    for _ in range(power):
+        result = np.dot(result, A)
 
 
-def find_primes(n):
-    primes = []
-    for i in range(2, n):
-        if is_prime(i):
-            primes.append(i)
-    return primes
+def fft_stress(array_size):
+    A = np.random.rand(array_size)
+
+    result = np.fft.fft(A)
 
 
-def fibonacci(n):
-    if n <= 1:
-        return n
-    else:
-        return fibonacci(n - 1) + fibonacci(n - 2)
+def calculate_scores2(sample_sizes, size, power, sizearray):
+    def task(num_samples):
+        start_time = time.time()
+        matrix_multiplication(num_samples)
+        fft_stress(sizearray)
+        matrix_exponentiation(size, power)
+        end_time = time.time()
+        return 1 / (end_time - start_time)
 
-
-def calculate_scores2(sample_sizes, n, x):
     score = 0
 
-    for num_samples in sample_sizes:
-        start_time = time.time()
-        _ = monte_carlo_pi(num_samples)
-        __ = fibonacci(n)
-        ___ = find_primes(x)
-        end_time = time.time()
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        futures = [executor.submit(task, num_samples) for num_samples in sample_sizes]
+        for future in concurrent.futures.as_completed(futures):
+            score += future.result()
 
-        elapsed_time = 1 / (end_time - start_time)
-        score = score + elapsed_time
-
-    return score
+    return math.ceil(score * 1666.67)
 
 
 class StartFrame(Frame):
@@ -134,17 +121,26 @@ class StartFrame(Frame):
 
         exit_button_image = Image.open("exit.png").resize((50, 50))
         self.exit_button_image_tk = ImageTk.PhotoImage(exit_button_image)
-        button3 = self.canvas.create_image(980, 1040, image=self.exit_button_image_tk, tag='exit_button')
+        self.button3 = self.canvas.create_image(980, 1040, image=self.exit_button_image_tk, tag='exit_button')
+
+        exit_hover_image = Image.open("exit_h.png").resize((50, 50))
+        self.exit_hover_tk = ImageTk.PhotoImage(exit_hover_image)
 
         self.canvas.tag_bind('exit_button', "<Button-1>", self.exit_app)
         self.canvas.tag_bind('exit_button', "<Enter>", lambda event: self.enter_exit_button())
         self.canvas.tag_bind('exit_button', "<Leave>", lambda event: self.leave_exit_button())
 
     def enter_exit_button(self):
+        self.canvas.itemconfig(self.button3, image=self.exit_hover_tk)
         self.controller.config(cursor="hand2")
 
     def leave_exit_button(self):
+        self.canvas.itemconfig(self.button3, image=self.exit_button_image_tk)
         self.controller.config(cursor="")
+
+    def exit_app(self, event=None):
+        self.controller.quit()
+
     def b1_enter(self):
         self.canvas.itemconfig(self.button1, image=self.button_hover_image_tk1)
         self.controller.config(cursor="hand2")
@@ -152,9 +148,6 @@ class StartFrame(Frame):
     def b1_leave(self):
         self.canvas.itemconfig(self.button1, image=self.button_image_tk1)
         self.controller.config(cursor="")
-
-    def exit_app(self, event=None):
-        self.controller.quit()
 
     def b2_enter(self):
         self.canvas.itemconfig(self.button2, image=self.button_hover_image_tk2)
@@ -196,16 +189,47 @@ class AlgorithmFrame(Frame):
 
         exit_button_image = Image.open("exit.png").resize((50, 50))
         self.exit_button_image_tk = ImageTk.PhotoImage(exit_button_image)
-        button2 = self.canvas.create_image(980, 1040, image=self.exit_button_image_tk, tag='exit_button')
+        self.button3 = self.canvas.create_image(980, 1040, image=self.exit_button_image_tk, tag='exit_button')
+
+        exit_hover_image = Image.open("exit_h.png").resize((50, 50))
+        self.exit_hover_tk = ImageTk.PhotoImage(exit_hover_image)
 
         self.canvas.tag_bind('exit_button', "<Button-1>", self.exit_app)
-        self.canvas.tag_bind('exit_button', "<Enter>", lambda event: self.enter())
-        self.canvas.tag_bind('exit_button', "<Leave>", lambda event: self.leave())
+        self.canvas.tag_bind('exit_button', "<Enter>", lambda event: self.enter_exit_button())
+        self.canvas.tag_bind('exit_button', "<Leave>", lambda event: self.leave_exit_button())
+
+    def enter_exit_button(self):
+        self.canvas.itemconfig(self.button3, image=self.exit_hover_tk)
+        self.controller.config(cursor="hand2")
+
+    def leave_exit_button(self):
+        self.canvas.itemconfig(self.button3, image=self.exit_button_image_tk)
+        self.controller.config(cursor="")
+
+    def exit_app(self, event=None):
+        self.controller.quit()
+    def reset(self):
+        if self.image_item:
+            self.canvas.delete(self.image_item)
+            self.image_item = None
 
     def start_animation(self):
         play()
         self.image_item = self.canvas.create_image(0, -600, image=self.image2_tk, anchor='nw')
         self.move_image()
+
+        image_mic_original = Image.open("mic.png").resize((200, 300))
+        self.mic_tk = ImageTk.PhotoImage(image_mic_original)
+        mic_image = self.canvas.create_image(150, 1000, image=self.mic_tk)
+
+        self.hide_mic_image(mic_image)
+
+    def hide_mic_image(self, mic_image):
+        self.canvas.itemconfigure(mic_image, state='hidden')
+        threading.Timer(12, lambda: self.show_mic_image(mic_image)).start()
+
+    def show_mic_image(self, mic_image):
+        self.canvas.itemconfigure(mic_image, state='normal')
 
     def exit_app(self, event=None):
         self.controller.quit()
@@ -226,7 +250,7 @@ class AlgorithmFrame(Frame):
             self.after(61, self.move_image)
 
     def execute_algorithms(self):
-        sample_sizes = [100000, 500000, 1000000]
+        sample_sizes = [10000]
         score = calculate_scores1(sample_sizes)
         if score:
             self.controller.show_frame(ResultFrame, score=score)
@@ -277,19 +301,48 @@ class AlgorithmFrameLong(Frame):
 
         exit_button_image = Image.open("exit.png").resize((50, 50))
         self.exit_button_image_tk = ImageTk.PhotoImage(exit_button_image)
-        button2 = self.canvas.create_image(980, 1040, image=self.exit_button_image_tk, tag='exit_button')
+        self.button3 = self.canvas.create_image(980, 1040, image=self.exit_button_image_tk, tag='exit_button')
+
+        exit_hover_image = Image.open("exit_h.png").resize((50, 50))
+        self.exit_hover_tk = ImageTk.PhotoImage(exit_hover_image)
 
         self.canvas.tag_bind('exit_button', "<Button-1>", self.exit_app)
-        self.canvas.tag_bind('exit_button', "<Enter>", lambda event: self.enter())
-        self.canvas.tag_bind('exit_button', "<Leave>", lambda event: self.leave())
+        self.canvas.tag_bind('exit_button', "<Enter>", lambda event: self.enter_exit_button())
+        self.canvas.tag_bind('exit_button', "<Leave>", lambda event: self.leave_exit_button())
+
+    def enter_exit_button(self):
+        self.canvas.itemconfig(self.button3, image=self.exit_hover_tk)
+        self.controller.config(cursor="hand2")
+
+    def leave_exit_button(self):
+        self.canvas.itemconfig(self.button3, image=self.exit_button_image_tk)
+        self.controller.config(cursor="")
+
+    def exit_app(self, event=None):
+        self.controller.quit()
+
+    def reset(self):
+        if self.image_item:
+            self.canvas.delete(self.image_item)
+            self.image_item = None
 
     def start_animation(self):
         play()
         self.image_item = self.canvas.create_image(0, -600, image=self.image2_tk, anchor='nw')
         self.move_image()
 
-    def exit_app(self, event=None):
-        self.controller.quit()
+        image_mic_original = Image.open("mic.png").resize((200, 300))
+        self.mic_tk = ImageTk.PhotoImage(image_mic_original)
+        mic_image = self.canvas.create_image(150, 1000, image=self.mic_tk)
+
+        self.hide_mic_image(mic_image)
+
+    def hide_mic_image(self, mic_image):
+        self.canvas.itemconfigure(mic_image, state='hidden')
+        threading.Timer(12, lambda: self.show_mic_image(mic_image)).start()
+
+    def show_mic_image(self, mic_image):
+        self.canvas.itemconfigure(mic_image, state='normal')
 
     def enter(self):
         self.controller.config(cursor="hand2")
@@ -307,8 +360,8 @@ class AlgorithmFrameLong(Frame):
             self.after(61, self.move_image)
 
     def execute_algorithms(self):
-        sample_sizes1 = [100000, 500000, 1000000]
-        score = calculate_scores2(sample_sizes1, 20, 100000)
+        sample_sizes1 = [10000]
+        score = calculate_scores2(sample_sizes1, 1000, 1000, 20000000)
         if score:
             self.controller.show_frame(ResultFrame, score=score)
 
@@ -347,16 +400,49 @@ class ResultFrame(Frame):
         self.image6_tk = ImageTk.PhotoImage(image6_original)
         self.canvas.create_image(779, 365, image=self.image6_tk, anchor='nw')
 
-        self.text_score = self.canvas.create_text(945, 850, text=f" {self.score} points", font=("Arial", 23),
-                                                  fill="yellow", anchor="center")
+        imagetzanca_original = Image.open("tzanca.png").resize((600, 1000))
+        self.imagetzanca_tk = ImageTk.PhotoImage(imagetzanca_original)
+        self.canvas.create_image(670, 450, image=self.imagetzanca_tk, anchor='nw')
+
+        self.text_score = self.canvas.create_text(945, 450, text=f"Score: {self.score}", font=("Arial", 23), fill="yellow", anchor="center")
 
         exit_button_image = Image.open("exit.png").resize((50, 50))
         self.exit_button_image_tk = ImageTk.PhotoImage(exit_button_image)
-        button1 = self.canvas.create_image(980, 1040, image=self.exit_button_image_tk, tag='exit_button')
+        self.button3 = self.canvas.create_image(980, 1040, image=self.exit_button_image_tk, tag='exit_button')
+
+        exit_hover_image = Image.open("exit_h.png").resize((50, 50))
+        self.exit_hover_tk = ImageTk.PhotoImage(exit_hover_image)
 
         self.canvas.tag_bind('exit_button', "<Button-1>", self.exit_app)
-        self.canvas.tag_bind('exit_button', "<Enter>", lambda event: self.enter())
-        self.canvas.tag_bind('exit_button', "<Leave>", lambda event: self.leave())
+        self.canvas.tag_bind('exit_button', "<Enter>", lambda event: self.enter_exit_button())
+        self.canvas.tag_bind('exit_button', "<Leave>", lambda event: self.leave_exit_button())
+
+        home_button_image = Image.open("home.png").resize((50, 50))
+        self.home_button_image_tk = ImageTk.PhotoImage(home_button_image)
+        self.button4 = self.canvas.create_image(900, 1040, image=self.home_button_image_tk, tag='home_button')
+
+        home_hover_image = Image.open("home_h.png").resize((50, 50))
+        self.home_hover_tk = ImageTk.PhotoImage(home_hover_image)
+
+        self.canvas.tag_bind('home_button', "<Button-1>", lambda event: self.switch_content(StartFrame))
+        self.canvas.tag_bind('home_button', "<Enter>", lambda event: self.enter_home_button())
+        self.canvas.tag_bind('home_button', "<Leave>", lambda event: self.leave_home_button())
+
+    def enter_home_button(self):
+        self.canvas.itemconfig(self.button4, image=self.home_hover_tk)
+        self.controller.config(cursor="hand2")
+
+    def leave_home_button(self):
+        self.canvas.itemconfig(self.button4, image=self.home_button_image_tk)
+        self.controller.config(cursor="")
+
+    def enter_exit_button(self):
+        self.canvas.itemconfig(self.button3, image=self.exit_hover_tk)
+        self.controller.config(cursor="hand2")
+
+    def leave_exit_button(self):
+        self.canvas.itemconfig(self.button3, image=self.exit_button_image_tk)
+        self.controller.config(cursor="")
 
     def exit_app(self, event=None):
         self.controller.quit()
@@ -370,7 +456,11 @@ class ResultFrame(Frame):
     def update_score(self, score=None):
         if score is not None:
             self.score = score
-        self.canvas.itemconfigure(self.text_score, text=f" {self.score} points")
+        self.canvas.itemconfigure(self.text_score, text=f"Score: {self.score}")
+
+    def switch_content(self, frame_class):
+        self.controller.show_frame(frame_class)
+        stop()
 
 
 def play():
@@ -378,6 +468,9 @@ def play():
     pygame.mixer.music.load("song.mp3")
     pygame.mixer.music.play(loops=0)
     pygame.mixer.music.set_volume(0.02)
+
+def stop():
+    pygame.mixer.music.stop()
 
 
 class MainApplication(tk.Tk):
@@ -407,6 +500,7 @@ class MainApplication(tk.Tk):
         frame = self.frames[cont]
         frame.tkraise()
         if cont in (AlgorithmFrame, AlgorithmFrameLong):
+            frame.reset()
             frame.start_animation()
         elif cont == ResultFrame:
             frame.update_score(score)
