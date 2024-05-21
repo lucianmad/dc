@@ -6,6 +6,37 @@ import random, time, threading
 import numpy as np
 import math
 import concurrent.futures
+import platform
+import sqlite3
+import cpuinfo
+
+def get_processor_name():
+    return cpuinfo.get_cpu_info()['brand_raw']
+
+def create_database():
+    conn = sqlite3.connect('benchmark_results.db')
+    cursor = conn.cursor()
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS results (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            score INTEGER,
+            timestamp TEXT,
+            processor_name TEXT,
+            benchmark_type TEXT
+        )
+    ''')
+    conn.commit()
+    conn.close()
+
+def store_result(score, processor_name, benchmark_type):
+    conn = sqlite3.connect('benchmark_results.db')
+    cursor = conn.cursor()
+    cursor.execute('''
+        INSERT INTO results (score, timestamp, processor_name, benchmark_type)
+        VALUES (?, ?, ?, ?)
+    ''', (score, time.strftime("%Y-%m-%d %H:%M:%S"), processor_name, benchmark_type))
+    conn.commit()
+    conn.close()
 
 def matrix_multiplication(matrix_size):
     A = np.random.rand(matrix_size, matrix_size)
@@ -253,6 +284,8 @@ class AlgorithmFrame(Frame):
         sample_sizes = [10000]
         score = calculate_scores1(sample_sizes)
         if score:
+            processor_name = get_processor_name()
+            store_result(score, processor_name, "short")
             self.controller.show_frame(ResultFrame, score=score)
 
     def create_loading_circle(self):
@@ -363,6 +396,8 @@ class AlgorithmFrameLong(Frame):
         sample_sizes1 = [10000]
         score = calculate_scores2(sample_sizes1, 1000, 1000, 20000000)
         if score:
+            processor_name = get_processor_name()
+            store_result(score, processor_name, "long")
             self.controller.show_frame(ResultFrame, score=score)
 
     def create_loading_circle(self):
@@ -400,11 +435,15 @@ class ResultFrame(Frame):
         self.image6_tk = ImageTk.PhotoImage(image6_original)
         self.canvas.create_image(779, 365, image=self.image6_tk, anchor='nw')
 
-        imagetzanca_original = Image.open("tzanca.png").resize((600, 1000))
-        self.imagetzanca_tk = ImageTk.PhotoImage(imagetzanca_original)
+        image_tzanca_original = Image.open("tzanca.png").resize((600, 1000))
+        self.imagetzanca_tk = ImageTk.PhotoImage(image_tzanca_original)
         self.canvas.create_image(670, 450, image=self.imagetzanca_tk, anchor='nw')
 
-        self.text_score = self.canvas.create_text(945, 450, text=f"Score: {self.score}", font=("Arial", 23), fill="yellow", anchor="center")
+        image_inscription_original = Image.open("inscriptie.png").resize((300, 180))
+        self.inscription_tk = ImageTk.PhotoImage(image_inscription_original)
+        self.canvas.create_image(957, 450, image=self.inscription_tk, anchor='center')
+
+        self.text_score = self.canvas.create_text(945, 450, text=f"Score: {self.score}", font=("Segoe UI Black", 23), fill="black", anchor="center")
 
         exit_button_image = Image.open("exit.png").resize((50, 50))
         self.exit_button_image_tk = ImageTk.PhotoImage(exit_button_image)
@@ -456,6 +495,9 @@ class ResultFrame(Frame):
     def update_score(self, score=None):
         if score is not None:
             self.score = score
+            #if score >= 55:
+
+
         self.canvas.itemconfigure(self.text_score, text=f"Score: {self.score}")
 
     def switch_content(self, frame_class):
@@ -477,6 +519,7 @@ class MainApplication(tk.Tk):
     def __init__(self, *args, **kwargs):
         score = None
         tk.Tk.__init__(self, *args, **kwargs)
+        create_database()
         self.geometry("1920x1080")
         self.configure(bg="#FFFFFF")
 
