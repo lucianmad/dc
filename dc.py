@@ -1,4 +1,5 @@
 import tkinter as tk
+import tkinter.messagebox as msgbox
 from tkinter import *
 from PIL import Image, ImageTk
 import pygame
@@ -6,10 +7,11 @@ import random, time, threading
 import numpy as np
 import math
 import concurrent.futures
-import sqlite3
 import platform
 import os
 import subprocess
+import firebase_admin
+from firebase_admin import credentials, firestore
 
 def get_processor_name():
     try:
@@ -20,30 +22,58 @@ def get_processor_name():
     except Exception as e:
         return f"Unknown CPU (Error: {e})"
 
-def create_database():
-    conn = sqlite3.connect('benchmark_results.db')
-    cursor = conn.cursor()
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS results (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            score INTEGER,
-            timestamp TEXT,
-            processor_name TEXT,
-            benchmark_type TEXT
-        )
-    ''')
-    conn.commit()
-    conn.close()
+def initialize_firebase():
+    cred = credentials.Certificate('ciocolatrbenchmark-firebase-adminsdk-nahi9-0720d0ed61.json')
+    firebase_admin.initialize_app(cred)
+    return firestore.client()
+
+db = initialize_firebase()
 
 def store_result(score, processor_name, benchmark_type):
-    conn = sqlite3.connect('benchmark_results.db')
-    cursor = conn.cursor()
-    cursor.execute('''
-        INSERT INTO results (score, timestamp, processor_name, benchmark_type)
-        VALUES (?, ?, ?, ?)
-    ''', (score, time.strftime("%Y-%m-%d %H:%M:%S"), processor_name, benchmark_type))
-    conn.commit()
-    conn.close()
+    doc_ref = db.collection('results').document()
+    doc_ref.set({
+        'score': score,
+        'timestamp': time.strftime("%Y-%m-%d %H:%M:%S"),
+        'processor_name': processor_name,
+        'benchmark_type': benchmark_type
+    })
+    save_results_to_file()
+
+def fetch_results():
+    results = db.collection('results').order_by('timestamp', direction=firestore.Query.DESCENDING).stream()
+    fetched_results = []
+    for doc in results:
+        doc_data = doc.to_dict()
+        fetched_results.append(doc_data)
+    return fetched_results
+
+def delete_all_results():
+    results = db.collection('results').stream()
+    for doc in results:
+        doc.reference.delete()
+
+def save_results_to_file(primary_sort_by='processor_name', secondary_sort_by='score'):
+    results = fetch_results()
+
+    if primary_sort_by == 'processor_name' and secondary_sort_by == 'score':
+        results = sorted(results, key=lambda x: (x['processor_name'], -x['score']))
+
+    max_score_len = max(len(str(result['score'])) for result in results)
+    max_processor_name_len = max(len(result['processor_name']) for result in results)
+    max_benchmark_type_len = max(len(result['benchmark_type']) for result in results)
+    formatted_results = []
+
+    for result in results:
+        score = str(result['score']).ljust(max_score_len)
+        processor_name = result['processor_name'].ljust(max_processor_name_len)
+        benchmark_type = result['benchmark_type'].ljust(max_benchmark_type_len)
+        result_str = f"Score: {score}  Processor: {processor_name}  Benchmark Type: {benchmark_type}"
+        formatted_results.append(result_str)
+    with open('results.txt', 'w') as f:
+        for result in formatted_results:
+            f.write(result + '\n')
+
+save_results_to_file()
 
 def matrix_multiplication(matrix_size):
     A = np.random.rand(matrix_size, matrix_size)
@@ -157,6 +187,17 @@ class StartFrame(Frame):
         self.canvas.tag_bind('event_button2', "<Enter>", lambda event: self.b2_enter())
         self.canvas.tag_bind('event_button2', "<Leave>", lambda event: self.b2_leave())
 
+        button4_image = Image.open("db.png").resize((400, 50))
+        self.button_image_tk4 = ImageTk.PhotoImage(button4_image)
+        self.button4 = self.canvas.create_image(800, 930, image=self.button_image_tk4, anchor='nw', tag='event_button4')
+
+        button4_hover_image = Image.open("db_h.png").resize((400, 50))
+        self.button_hover_image_tk4 = ImageTk.PhotoImage(button4_hover_image)
+
+        self.canvas.tag_bind('event_button4', "<Button-1>", lambda event: self.open_results_file())
+        self.canvas.tag_bind('event_button4', "<Enter>", lambda event: self.db_enter())
+        self.canvas.tag_bind('event_button4', "<Leave>", lambda event: self.db_leave())
+
         exit_button_image = Image.open("exit.png").resize((50, 50))
         self.exit_button_image_tk = ImageTk.PhotoImage(exit_button_image)
         self.button3 = self.canvas.create_image(980, 1040, image=self.exit_button_image_tk, tag='exit_button')
@@ -195,9 +236,21 @@ class StartFrame(Frame):
         self.canvas.itemconfig(self.button2, image=self.button_image_tk2)
         self.controller.config(cursor="")
 
+    def db_enter(self):
+        self.canvas.itemconfig(self.button4, image=self.button_hover_image_tk4)
+        self.controller.config(cursor="hand2")
+    def db_leave(self):
+        self.canvas.itemconfig(self.button4, image=self.button_image_tk4)
+        self.controller.config(cursor="")
     def switch_content(self, frame_class):
         self.controller.show_frame(frame_class)
 
+    def open_results_file(self):
+        filename = 'results.txt'
+        if os.path.exists(filename):
+            subprocess.Popen(['notepad.exe', filename], shell=True, creationflags=subprocess.DETACHED_PROCESS)
+        else:
+            msgbox.showinfo("Results", "Results file not found")
 
 class AlgorithmFrame(Frame):
     def __init__(self, parent, controller):
@@ -505,7 +558,7 @@ class ResultFrame(Frame):
                 self.canvas.delete(self.image_item)
             if self.image_item2:
                 self.canvas.delete(self.image_item2)
-            if self.score > 6500:
+            if self.score > 7500:
                 image_tzanca_boss = Image.open("tzanca_boss.png").resize((600, 600))
                 self.imagetzancaboss_tk = ImageTk.PhotoImage(image_tzanca_boss)
                 self.image_item = self.canvas.create_image(670, 490, image=self.imagetzancaboss_tk, anchor='nw')
@@ -513,7 +566,7 @@ class ResultFrame(Frame):
                 self.imagescor1_tk = ImageTk.PhotoImage(image_scor_original)
                 self.image_item2 = self.canvas.create_image(1000, 450, image=self.imagescor1_tk, anchor='nw')
                 play4()
-            elif self.score > 5000:
+            elif self.score > 4500:
                 image_tzanca_original = Image.open("tzanca.png").resize((1000, 600))
                 self.imagetzanca_tk = ImageTk.PhotoImage(image_tzanca_original)
                 self.image_item = self.canvas.create_image(470, 490, image=self.imagetzanca_tk, anchor='nw')
@@ -569,7 +622,6 @@ class MainApplication(tk.Tk):
     def __init__(self, *args, **kwargs):
         score = None
         tk.Tk.__init__(self, *args, **kwargs)
-        create_database()
         self.geometry("1920x1080")
         self.configure(bg="#FFFFFF")
 
@@ -603,3 +655,4 @@ if __name__ == "__main__":
     app = MainApplication()
     app.attributes("-fullscreen", True)
     app.mainloop()
+    save_results_to_file()
