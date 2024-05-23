@@ -1,0 +1,46 @@
+Score: 10268  Processor: 13th Gen Intel(R) Core(TM) i7-13700F             Benchmark Type: long 
+Score: 9748   Processor: 13th Gen Intel(R) Core(TM) i7-13700F             Benchmark Type: long 
+Score: 8095   Processor: 13th Gen Intel(R) Core(TM) i7-13700F             Benchmark Type: short
+Score: 6304   Processor: AMD Ryzen 3 3100 4-Core Processor                Benchmark Type: long 
+Score: 6052   Processor: AMD Ryzen 3 3100 4-Core Processor                Benchmark Type: long 
+Score: 5927   Processor: AMD Ryzen 3 3100 4-Core Processor                Benchmark Type: long 
+Score: 5615   Processor: AMD Ryzen 3 3100 4-Core Processor                Benchmark Type: short
+Score: 5539   Processor: AMD Ryzen 3 3100 4-Core Processor                Benchmark Type: short
+Score: 5505   Processor: AMD Ryzen 3 3100 4-Core Processor                Benchmark Type: short
+Score: 5322   Processor: AMD Ryzen 3 3100 4-Core Processor                Benchmark Type: short
+Score: 5285   Processor: AMD Ryzen 3 3100 4-Core Processor                Benchmark Type: short
+Score: 5241   Processor: AMD Ryzen 3 3100 4-Core Processor                Benchmark Type: short
+Score: 5230   Processor: AMD Ryzen 3 3100 4-Core Processor                Benchmark Type: short
+Score: 4173   Processor: AMD Ryzen 5 2600 Six-Core Processor              Benchmark Type: long 
+Score: 3418   Processor: AMD Ryzen 5 2600 Six-Core Processor              Benchmark Type: short
+Score: 3391   Processor: AMD Ryzen 5 2600 Six-Core Processor              Benchmark Type: short
+Score: 2063   Processor: AMD Ryzen 7 3750H with Radeon Vega Mobile Gfx    Benchmark Type: long 
+Score: 1929   Processor: AMD Ryzen 7 3750H with Radeon Vega Mobile Gfx    Benchmark Type: short
+Score: 5722   Processor: Intel(R) Core(TM) i5-10300H CPU @ 2.50GHz        Benchmark Type: long 
+Score: 5543   Processor: Intel(R) Core(TM) i5-10300H CPU @ 2.50GHz        Benchmark Type: long 
+Score: 5016   Processor: Intel(R) Core(TM) i5-10300H CPU @ 2.50GHz        Benchmark Type: short
+Score: 4934   Processor: Intel(R) Core(TM) i5-10300H CPU @ 2.50GHz        Benchmark Type: short
+Score: 7000   Processor: Intel(R) Core(TM) i5-10400F CPU @ 2.90GHz        Benchmark Type: long 
+Score: 4993   Processor: Intel(R) Core(TM) i5-10400F CPU @ 2.90GHz        Benchmark Type: short
+Score: 1928   Processor: Intel(R) Core(TM) i5-4310M CPU @ 2.70GHz         Benchmark Type: long 
+Score: 1832   Processor: Intel(R) Core(TM) i5-4310M CPU @ 2.70GHz         Benchmark Type: short
+Score: 5446   Processor: Intel(R) Core(TM) i7-6700 CPU @ 3.40GHz          Benchmark Type: long 
+Score: 5443   Processor: Intel(R) Core(TM) i7-6700 CPU @ 3.40GHz          Benchmark Type: long 
+Score: 4699   Processor: Intel(R) Core(TM) i7-6700 CPU @ 3.40GHz          Benchmark Type: short
+Score: 4641   Processor: Intel(R) Core(TM) i7-6700 CPU @ 3.40GHz          Benchmark Type: short
+Score: 4567   Processor: Intel(R) Core(TM) i7-6700 CPU @ 3.40GHz          Benchmark Type: short
+Score: 4009   Processor: Intel(R) Core(TM) i7-7700 CPU @ 3.60GHz          Benchmark Type: short
+Score: 3505   Processor: Intel(R) Core(TM) i7-7700 CPU @ 3.60GHz          Benchmark Type: long 
+Score: 3166   Processor: Intel(R) Core(TM) i7-7700 CPU @ 3.60GHz          Benchmark Type: short
+Score: 6913   Processor: Intel(R) Core(TM) i7-7700K CPU @ 4.20GHz         Benchmark Type: long 
+Score: 6906   Processor: Intel(R) Core(TM) i7-7700K CPU @ 4.20GHz         Benchmark Type: long 
+Score: 6303   Processor: Intel(R) Core(TM) i7-7700K CPU @ 4.20GHz         Benchmark Type: long 
+Score: 6213   Processor: Intel(R) Core(TM) i7-7700K CPU @ 4.20GHz         Benchmark Type: long 
+Score: 6208   Processor: Intel(R) Core(TM) i7-7700K CPU @ 4.20GHz         Benchmark Type: long 
+Score: 6159   Processor: Intel(R) Core(TM) i7-7700K CPU @ 4.20GHz         Benchmark Type: long 
+Score: 6127   Processor: Intel(R) Core(TM) i7-7700K CPU @ 4.20GHz         Benchmark Type: long 
+Score: 5472   Processor: Intel(R) Core(TM) i7-7700K CPU @ 4.20GHz         Benchmark Type: short
+Score: 3673   Processor: Intel(R) Core(TM) i7-7700K CPU @ 4.20GHz         Benchmark Type: short
+Score: 10521  Processor: Intel(R) Core(TM) i9-9900K CPU @ 3.60GHz         Benchmark Type: long 
+Score: 9856   Processor: Intel(R) Core(TM) i9-9900K CPU @ 3.60GHz         Benchmark Type: long 
+Score: 7693   Processor: Intel(R) Core(TM) i9-9900K CPU @ 3.60GHz         Benchmark Type: short
